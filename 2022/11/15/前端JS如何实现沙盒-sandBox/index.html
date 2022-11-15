@@ -1,0 +1,182 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>前端JS如何实现沙盒#sandBox# | feenan的宝藏</title><meta name="keywords" content="前端 web 程序员 码农 cv战士"><meta name="author" content="feenan"><meta name="copyright" content="feenan"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="欢迎来到feenan的藏宝洞！这里是我的第三个宝贝哦。如果讲的不对，当(huan)我(ying)没(zhi)说(zheng)。 某日在完成当日掘金任务的时候，刷到了一个帖子，帖子内容是关于面试中被问到如何实现一个无法访问到window，document，fetch的一个隔离环境。本人第一时间想到了属性描述符（懂的人先勿喷）。写到这里感觉自己是真的不会水文呀，想当年我写小说的时候，也是该水的时候不会">
+<meta property="og:type" content="article">
+<meta property="og:title" content="前端JS如何实现沙盒#sandBox#">
+<meta property="og:url" content="https://feenan.github.io/2022/11/15/%E5%89%8D%E7%AB%AFJS%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E6%B2%99%E7%9B%92-sandBox/index.html">
+<meta property="og:site_name" content="feenan的宝藏">
+<meta property="og:description" content="欢迎来到feenan的藏宝洞！这里是我的第三个宝贝哦。如果讲的不对，当(huan)我(ying)没(zhi)说(zheng)。 某日在完成当日掘金任务的时候，刷到了一个帖子，帖子内容是关于面试中被问到如何实现一个无法访问到window，document，fetch的一个隔离环境。本人第一时间想到了属性描述符（懂的人先勿喷）。写到这里感觉自己是真的不会水文呀，想当年我写小说的时候，也是该水的时候不会">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg">
+<meta property="article:published_time" content="2022-11-15T06:56:53.000Z">
+<meta property="article:modified_time" content="2022-11-15T09:50:39.100Z">
+<meta property="article:author" content="feenan">
+<meta property="article:tag" content="前端 web 程序员 码农 cv战士">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg"><link rel="shortcut icon" href="https://s2.loli.net/2021/12/29/cXNZ8ojFy5d9Owm.jpg"><link rel="canonical" href="https://feenan.github.io/2022/11/15/%E5%89%8D%E7%AB%AFJS%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E6%B2%99%E7%9B%92-sandBox/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":200},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '前端JS如何实现沙盒#sandBox#',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-11-15 17:50:39'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://s2.loli.net/2021/12/29/cXNZ8ojFy5d9Owm.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-archway"></i><span> 宝藏总览</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-address-book"></i><span> 强力输出</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">feenan的宝藏</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-archway"></i><span> 宝藏总览</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-address-book"></i><span> 强力输出</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">前端JS如何实现沙盒#sandBox#</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-11-15T06:56:53.000Z" title="发表于 2022-11-15 14:56:53">2022-11-15</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-11-15T09:50:39.100Z" title="更新于 2022-11-15 17:50:39">2022-11-15</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="前端JS如何实现沙盒#sandBox#"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>欢迎来到<a href="https://feenan.github.io/">feenan的藏宝洞</a>！这里是我的第三个宝贝哦。如果讲的不对，当(huan)我(ying)没(zhi)说(zheng)。</p>
+<p>某日在完成当日掘金任务的时候，刷到了一个帖子，帖子内容是关于面试中被问到如何实现一个无法访问到window，document，fetch的一个隔离环境。本人第一时间想到了属性描述符（懂的人先勿喷）。写到这里感觉自己是真的不会水文呀，想当年我写小说的时候，也是该水的时候不会水，不该水的时候，主角们的一个照面都能写800字，这么多年竟毫无长进。</p>
+<p>如果你还不知道属性描述符的话，那么我们先浅介绍一下，</p>
+<h2 id="一-属性描述符"><a href="#一-属性描述符" class="headerlink" title="一.属性描述符"></a>一.属性描述符</h2><p>&nbsp;&nbsp;roperty Descriptor(属性描述符)  是一个普通对象，用于描述一个属性的相关信息。我们可以通过Object.getOwnPropertyDescriptor(对象, 属性名)；就可以得到一个对象的某个属性的属性描述符。<br>返回的属性描述符对象有以下几个属性：</p>
+<ul>
+<li>value：属性值</li>
+<li>configurable：该属性的描述符是否可以修改</li>
+<li>enumerable：该属性是否可以被枚举</li>
+<li>writable：该属性是否可以被重新赋值<br>例如：<img src="/2022/11/15/%E5%89%8D%E7%AB%AFJS%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E6%B2%99%E7%9B%92-sandBox/getOwnPropertyDescriptor.png" class="" title="This is an getOwnPropertyDescriptor image"></li>
+</ul>
+<p>这些属性各有各的妙用，但由于男主角不是属性描述符，在此就不多做赘述了。<br>重点来了，我们可以使用Object.defineProperty（被定义属性的对象,属性名,属性描述符）来给一个对象新增属性或者修改属性。</p>
+<h2 id="二-属性描述符能帮助我们实现沙盒吗？"><a href="#二-属性描述符能帮助我们实现沙盒吗？" class="headerlink" title="二.属性描述符能帮助我们实现沙盒吗？"></a>二.属性描述符能帮助我们实现沙盒吗？</h2><p>&nbsp;&nbsp;先来试试属性描述符能否帮助我们直接实现一个简易的无法获取document的沙盒。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Object.defineProperty(window, <span class="string">&#x27;document&#x27;</span>, &#123; get: ()=&gt;&#123;</span><br><span class="line">  throw new Error(<span class="string">&#x27;document无法访问&#x27;</span>)</span><br><span class="line">&#125; &#125;)</span><br></pre></td></tr></table></figure>
+<img src="/2022/11/15/%E5%89%8D%E7%AB%AFJS%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E6%B2%99%E7%9B%92-sandBox/definePropertyError.png" class="" title="This is an definePropertyError image">
+
+<p>&nbsp;&nbsp;很好，首战失利。<br>&nbsp;&nbsp;经过我的调查和咨询，好吧其实就是百度了一下，发现原来一个属性的属性描述符中configurable如果为false，那么是无法被重新修改属性描述符的，这就代表了其value也是无法被修改的，所以那些想要通过对这些变量重新赋值undefined来达到目的的童鞋也可以歇歇了，到了这一步我意识到，这也是为什么我们用[Var]声明了一个变量xxx后,无法通过 delete window.xxx 来删除xxx变量的原因了吧。</p>
+<p>既然属性描述符无法达到我们的目的，那还有谁能来拯救我们于面试官的扎心拷问中呢？？？还是我。</p>
+<h2 id="三-with"><a href="#三-with" class="headerlink" title="三.with"></a>三.with</h2><p>&nbsp;&nbsp;with语句，一个我从来没用过，只是两年前入行的时候学到过的一个关键字，依稀记得这玩意儿能改变作用域链，赶忙回头翻笔记。不得不提一句，做笔记真的是好习惯，我不相信人脑的记忆力，以至于我的电脑里有我的所有笔记，工作后也会写工作记录文档。“让一切可追溯。”是我从我入职的第一家公司学习到的好习惯。不过,过于依赖外力，也导致我越来越懒，，，，<br>言归正传，with语句的作用是什么呢？<br>&nbsp;&nbsp; 改变作用域链：使得其后花括号里的内容最直接的AO是传入的对象。在一个函数里使用就使得优先级发生了变化，从函数自己的AO到GO变成了从obj到AO到GO。通俗易懂的来讲就是：with语句中对于任何变量的访问，先在传入的obj里找，找到就拿，找不到就继续沿着作用域链找（非函数块里的with，就会直接在全局找，如果是函数块里的with，就会先在函数块级作用域找），直到拿到。下面是一个简单的例子</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">const obj = &#123;</span><br><span class="line">  x:<span class="string">&#x27;1&#x27;</span>,</span><br><span class="line">&#125;;</span><br><span class="line">const x = <span class="string">&#x27;3&#x27;</span>;</span><br><span class="line">const y = <span class="string">&#x27;4&#x27;</span>;</span><br><span class="line">with(obj)&#123;</span><br><span class="line">  <span class="keyword">function</span> <span class="function"><span class="title">s</span></span>()&#123;</span><br><span class="line">    console.log(x); // 1</span><br><span class="line">    console.log(y); // 4</span><br><span class="line">  &#125;</span><br><span class="line">  s();</span><br><span class="line">  console.log(x); //1</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>但是我们只有with还不够，因为如果在传入对象里找不到document的话，也会继续沿着作用域链找，最后仍然可以拿到。所以又有一个久远到我快要忘记的东西，也是今天的女主角 – Proxy。</p>
+<h2 id="四-with-proxy代理实现一个简单沙箱"><a href="#四-with-proxy代理实现一个简单沙箱" class="headerlink" title="四.with + proxy代理实现一个简单沙箱"></a>四.with + proxy代理实现一个简单沙箱</h2><p>&nbsp;&nbsp;讲proxy之前，先来讲（mai nong）一下Reflect，Reflect是一个内置的JS对象，它提供了一系列方法，可以让开发者通过调用这些方法，访问一些JS底层功能。由于它类似于其他语言的<strong>反射</strong>，因此取名为Reflect。使用Reflect可以实现诸如：属性的赋值与取值、调用普通函数、调用构造函数、判断属性是否存在与对象中等等功能。<br>&nbsp;&nbsp;有些童鞋会有疑问了，这些功能不是已经存在了吗？为什么还需要用Reflect实现一次？有一个重要的理念，在ES5就被提出：减少魔法、让代码更加纯粹。这种理念很大程度上是受到函数式编程的影响，ES6进一步贯彻了这种理念，它认为，对属性内存的控制、原型链的修改、函数的调用等等，这些都属于底层实现，属于一种魔法，因此，需要将它们提取出来，形成一个正常的API，并高度聚合到某个对象中，于是，就造就了Reflect对象。该对象中有很多方法，比如：</p>
+<ul>
+<li>Reflect.set(target, propertyKey, value): 设置对象target的属性propertyKey的值为value，等同于给对象的属性赋值。</li>
+<li>Reflect.get(target, propertyKey): 读取对象target的属性propertyKey，等同于读取对象的属性值。</li>
+<li>Reflect.apply(target, thisArgument, argumentsList)：调用一个指定的函数，并绑定this和参数列表。等同于函数调用。</li>
+<li>Reflect.has(target, propertyKey): 判断一个对象是否拥有一个属性<br>等等等等。</li>
+</ul>
+<p>&nbsp;&nbsp;而Proxy的厉害之处在于能够重写反射Reflect里的APi。代理修改了底层实现的方式，通过代理对象Proxy来对原变量进行操作。其能够改写的底层实现，就是Reflect里的那些方法属性，并且还能够在里面调用Reflect的方法。<br>那我们这就正式开始构建沙箱吧！</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">// 不可访问全局作用域的黑名单列表</span><br><span class="line">const unaccess_white_list = [<span class="string">&quot;window&quot;</span>, <span class="string">&quot;document&quot;</span>, <span class="string">&#x27;XMLHttpRequest&#x27;</span>, <span class="string">&#x27;fetch&#x27;</span>];</span><br><span class="line"></span><br><span class="line">// 封装一个工具类</span><br><span class="line">class SandboxGlobalProxy &#123;</span><br><span class="line">  constructor(objO, unaccess_white_list) &#123;</span><br><span class="line">    <span class="built_in">return</span> new Proxy(objO, &#123;</span><br><span class="line">      has: (target, prop) =&gt; &#123;</span><br><span class="line">        <span class="keyword">if</span> (unaccess_white_list.includes(prop) &amp;&amp; !target.hasOwnProperty(prop)) &#123;</span><br><span class="line">          // 如果属性在黑名单里，且该对象里没有的话就抛出错误</span><br><span class="line">          throw new Error(`Not find: <span class="variable">$&#123;prop&#125;</span>!`)</span><br><span class="line">        &#125;</span><br><span class="line">        // 如果没有该属性，沿作用域链向外找</span><br><span class="line">        <span class="keyword">if</span> (!target.hasOwnProperty(prop)) &#123;</span><br><span class="line">          <span class="built_in">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        // 属性存在，返回objO中的值</span><br><span class="line">        <span class="built_in">return</span> <span class="literal">true</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">const obj2 = &#123;</span><br><span class="line">  name: <span class="string">&#x27;李白喵&#x27;</span>,</span><br><span class="line">  callBack: <span class="function"><span class="title">function</span></span>()&#123;console.log(name)&#125;</span><br><span class="line">&#125;</span><br><span class="line">const name = <span class="string">&#x27;小石头要变成星球&#x27;</span>;</span><br><span class="line">const age = <span class="string">&#x27;18&#x27;</span>;</span><br><span class="line">const obj2Proxy = new SandboxGlobalProxy(obj2, unaccess_white_list);</span><br><span class="line">with(obj2Proxy)&#123;</span><br><span class="line">  console.log(name); // 李白喵</span><br><span class="line">  console.log(age); // 18</span><br><span class="line">  callBack();</span><br><span class="line">  console.log(document); // Uncaught Error: Not find: document!</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这就实现了一个简易沙箱了【耶耶耶】，你有什么其他方案吗？</p>
+<h2 id="五-本期疑问"><a href="#五-本期疑问" class="headerlink" title="五.本期疑问"></a>五.本期疑问</h2><p>在上文采用with和proxy实现简易沙箱的过程中，我们在with语句中调用了callBack方法，大家猜一猜，打印出来的会是什么呢？下期见。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">feenan</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://feenan.github.io/2022/11/15/%E5%89%8D%E7%AB%AFJS%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E6%B2%99%E7%9B%92-sandBox/">https://feenan.github.io/2022/11/15/%E5%89%8D%E7%AB%AFJS%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E6%B2%99%E7%9B%92-sandBox/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://feenan.github.io" target="_blank">feenan的宝藏</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2022/10/09/%E5%8E%9F%E7%94%9Fjs%E5%AE%9E%E7%8E%B0%E6%8B%8D%E7%85%A7/"><img class="next-cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">原生Javascript实现Camera</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://s2.loli.net/2021/12/29/cXNZ8ojFy5d9Owm.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">feenan</div><div class="author-info__description">我在前端行业的两年所得</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">feenan的藏宝洞现在对外开放了哦！走过路过不要错过！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80-%E5%B1%9E%E6%80%A7%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="toc-number">1.</span> <span class="toc-text">一.属性描述符</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C-%E5%B1%9E%E6%80%A7%E6%8F%8F%E8%BF%B0%E7%AC%A6%E8%83%BD%E5%B8%AE%E5%8A%A9%E6%88%91%E4%BB%AC%E5%AE%9E%E7%8E%B0%E6%B2%99%E7%9B%92%E5%90%97%EF%BC%9F"><span class="toc-number">2.</span> <span class="toc-text">二.属性描述符能帮助我们实现沙盒吗？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89-with"><span class="toc-number">3.</span> <span class="toc-text">三.with</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B-with-proxy%E4%BB%A3%E7%90%86%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E6%B2%99%E7%AE%B1"><span class="toc-number">4.</span> <span class="toc-text">四.with + proxy代理实现一个简单沙箱</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94-%E6%9C%AC%E6%9C%9F%E7%96%91%E9%97%AE"><span class="toc-number">5.</span> <span class="toc-text">五.本期疑问</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/11/15/%E5%89%8D%E7%AB%AFJS%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E6%B2%99%E7%9B%92-sandBox/" title="前端JS如何实现沙盒#sandBox#"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="前端JS如何实现沙盒#sandBox#"/></a><div class="content"><a class="title" href="/2022/11/15/%E5%89%8D%E7%AB%AFJS%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E6%B2%99%E7%9B%92-sandBox/" title="前端JS如何实现沙盒#sandBox#">前端JS如何实现沙盒#sandBox#</a><time datetime="2022-11-15T06:56:53.000Z" title="发表于 2022-11-15 14:56:53">2022-11-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/10/09/%E5%8E%9F%E7%94%9Fjs%E5%AE%9E%E7%8E%B0%E6%8B%8D%E7%85%A7/" title="原生Javascript实现Camera"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="原生Javascript实现Camera"/></a><div class="content"><a class="title" href="/2022/10/09/%E5%8E%9F%E7%94%9Fjs%E5%AE%9E%E7%8E%B0%E6%8B%8D%E7%85%A7/" title="原生Javascript实现Camera">原生Javascript实现Camera</a><time datetime="2022-10-09T04:00:45.000Z" title="发表于 2022-10-09 12:00:45">2022-10-09</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/12/16/%E5%8E%9F%E7%94%9F%E6%89%AB%E9%9B%B7/" title="原生扫雷游戏实现（前端新手友好）"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="原生扫雷游戏实现（前端新手友好）"/></a><div class="content"><a class="title" href="/2021/12/16/%E5%8E%9F%E7%94%9F%E6%89%AB%E9%9B%B7/" title="原生扫雷游戏实现（前端新手友好）">原生扫雷游戏实现（前端新手友好）</a><time datetime="2021-12-16T00:31:43.017Z" title="发表于 2021-12-16 08:31:43">2021-12-16</time></div></div></div></div></div></div></main><footer id="footer" style="background: #6B8E4E"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2022 By feenan</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div><div class="footer_custom_text">是不是还没看够哇？快关注我吧！我的宝藏跟你共享。</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
